@@ -10,7 +10,7 @@ _start:
 
     mov eax, msg
     mov ebx, 19
-    mov byte [eax + ebx * 1], '%'  ;REGISTRO (edx) + INDICE (ebx = 25). Cambia 'z' por 'Z'
+    mov byte [eax + ebx * 1], '%'  ;REGISTRO (eax) + INDICE (ebx = 19) * escala. Cambia 't' por '%'
 
     mov edx, msg        ; volver a apuntar a msg
     call puts
