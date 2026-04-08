@@ -9,8 +9,8 @@ _start:
 	call puts			; imprime cadena msg terminada en valor nulo (0)
 
     mov eax, msg
-    mov ebx, 19
-    mov byte [eax + ebx * 1], '%'  ;REGISTRO (eax) + INDICE (ebx = 19) * escala. Cambia 't' por '%'
+    mov ebx, 9
+    mov byte [eax + ebx * 2 + 1], '%'  ;REGISTRO (eax) + INDICE (ebx = 19) * escala. Cambia 't' por '%'
 
     mov edx, msg        ; volver a apuntar a msg
     call puts
