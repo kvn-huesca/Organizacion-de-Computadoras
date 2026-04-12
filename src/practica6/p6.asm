@@ -5,7 +5,6 @@ section	.text
 	global _start       ;referencia para inicio de programa
 	
 _start:                   
-
     call getch
     call itoa
     mov edx,ncad
@@ -36,6 +35,8 @@ _start:
         call getch
         cmp al,127
         jne .guardar
+        cmp edx, cad
+        je .ciclo
         call borrar
         jmp .ciclo
        .guardar:
@@ -61,6 +62,8 @@ _start:
         mov al,0x8
         call putchar   
         pop ax
+        dec edx
+        inc cx
         ret 
 
     itoa:
