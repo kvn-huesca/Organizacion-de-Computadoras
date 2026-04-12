@@ -5,12 +5,9 @@ section	.text
 	global _start       ;referencia para inicio de programa
 	
 _start:                   
-    call getch
-    call itoa
+
     mov edx,ncad
     call puts
-
-    
 
     mov bx,word[len]
     mov edx,cad
@@ -23,8 +20,67 @@ _start:
     call putchar
     call putchar
 
+    mov edx,cad
+    call minusculas
+    mov al,[nlin]
+    call putchar
+    call puts
+
+    mov al,[nlin]
+    call putchar
+    call putchar
+
 	mov	eax, 1	    	; seleccionar llamada al sistema para fin de programa
 	int	0x80        	; llamada al sistema - fin de programa
+
+    minusculas:
+        push edx
+        push cx
+        mov cx,bx
+    .ciclo2:
+        cmp byte[edx],0
+        je .fin1
+
+        cmp byte[edx],65
+        jl .siguiente1
+
+        cmp byte[edx],90
+        jg .siguiente1
+
+        add byte[edx], 32
+    .siguiente1:
+        inc edx
+        loop .ciclo2
+
+    .fin1:
+        pop cx
+        pop edx
+        ret
+
+    mayusculas:
+        push edx
+        push cx
+        mov cx,bx
+    .ciclo1:
+        cmp byte[edx],0
+        je .fin
+
+        cmp byte[edx],97
+        jl .siguiente
+
+        cmp byte[edx],122
+        jg .siguiente
+
+        sub byte[edx], 32
+    .siguiente:
+        inc edx
+        loop .ciclo1
+
+    .fin:
+        pop cx
+        pop edx
+        ret
+
 
     capturar:
         push edx
@@ -78,10 +134,9 @@ _start:
         add al,'0'
         call putchar
 
-
-
         pop bx
         ret
+
 section	.data
     ncad db 0xa,'Cadena: ',0
     nlin db 0xa
