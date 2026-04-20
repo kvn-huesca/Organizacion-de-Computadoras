@@ -21,7 +21,7 @@ _start:
     call putchar
 
     mov edx,cad
-    call minusculas
+    call mayusculas
     mov al,[nlin]
     call putchar
     call puts
