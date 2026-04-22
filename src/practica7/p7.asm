@@ -8,39 +8,134 @@ _start:
     mov edx,ncad            ; edx contiene direccion de ncad
     call puts               ; se imprime ncad
 
-    mov bx,word[len]        ; bx contiene el tamaño max de la cadena = 64
+    mov bl,byte[len]        ; bx contiene el tamaño max de la cadena = 64
     mov edx,cad             ; edx contiene la direccion de cad
     call capturar           ; llamar subrutina capturar
 
     mov al,[nlin]           ; AL contiene una varaible con salto de linea (0xa) declarado en section .data
-    call putchar            ; se imprime el salto de linea
-    call puts               ; se imprime la cad modificada
-
-    call putchar
     call putchar
 
-    mov eax,123
+    mov edx, cad
+    call atoi                ;mov eax, -123
     call itoa
-    mov al,[nlin]
-    call putchar
+
+    mov al,[nlin]  
     call puts
+
+    call putchar
+    call putchar
 
     mov	eax, 1	    	; seleccionar llamada al sistema para fin de programa
 	int	0x80        	; llamada al sistema - fin de programa
 
     atoi:
+        push ebx
         push edx
         push cx
+
         mov cx,bx
+        mov ebx, edx
 
-        .ciclo:
+        .saltar_espacios:
+            cmp byte[ebx],' '
+            je .espacio
+            cmp byte[ebx],0x09
+            jne .parar
 
-        .saltar:
-            inc edx
-            loop .ciclo
+            .espacio:
+            add ebx,1
+            jmp .saltar_espacios
+        .parar:
+
+        cmp byte[ebx], '-'
+        je .incrementar_cadena
+        jmp .guardar_direccion
+
+        .incrementar_cadena:
+            add ebx, 1
+            mov byte[signo], -1
+
+        .guardar_direccion:
+            mov edx, ebx
+
+        .tamaño_cadena:
+            cmp byte[ebx], 0 ; si ebx != 0
+            je .fin_tamaño_cadena
+            cmp byte[ebx], ' '
+            je .saltar
+            cmp byte[ebx], '0'
+            jl .fin_tamaño_cadena
+            cmp byte[ebx], '9'
+            jg .fin_tamaño_cadena
+
+            ; si no
+            add byte[cant],1
+            .saltar:
+            inc ebx
+            loop .tamaño_cadena
+
+        .fin_tamaño_cadena:
+        mov ebx, edx
+        cmp byte[ebx], '-'
+        je .incrementar
+        jmp .no_incrementar
+
+        .incrementar:
+            add ebx, 1
+        .no_incrementar:
+
+        xor edx, edx
+        xor cx, cx ;limpiar registro cx=0
+        mov cl, byte[cant] ; cl = cant
+        sub cl,1 ; cl = cant -1
+        mov dword[numero_entero],0
+        mov dword[base], 10
+        mov dword[max_mul], 1
+        .multiplicacion:
+            mov eax, dword[max_mul] ;eax = max_mul = 1
+            mul dword[base] ; eax * (base = 10)
+            mov dword[max_mul], eax
+        loop .multiplicacion
+
+        mov dword[numero_entero],0
+        xor eax, eax
+        xor cx, cx
+        mov cl, byte[len] 
+        .for:
+            xor edx, edx ;limpiar registro edx en cada vuelta
+            cmp byte[ebx], 0
+            je .fin_for
+
+            cmp byte[ebx], '0'
+            jl .fin_for
+            cmp byte[ebx], '9'
+            jg .fin_for
+
+            xor eax, eax
+            mov al, byte[ebx]
+            sub eax, '0'
+            mul dword[max_mul]
+            add dword[numero_entero], eax
+
+            xor edx, edx
+            mov eax, dword[max_mul]
+            div dword[base]
+            mov dword[max_mul], eax
+
+            inc ebx
+            loop .for
+
+        .fin_for:
+       mov eax, dword[numero_entero]
+       cmp byte[signo], -1
+       jne .salir
+       neg eax
+       mov dword[numero_entero], eax
     .salir:
+        mov eax, dword[numero_entero]
         pop cx
         pop edx
+        pop ebx
         ret
 
 
@@ -184,13 +279,23 @@ _start:
 
 
 section	.data
+    ;variables atoi
+    cant db 0
+    max_mul dd 1
+
+
+    ;variables itoa
     cociente dd 0
     residuo dd 0
     numero_entero dd 0
     max_div dd 1000000000
+    
+    ;variables compartidas atoi e itoa
     base dd 10
     signo db 1
+
+    ;variables generales
     ncad db 0xa,'Cadena: ',0
     nlin db 0xa
-    len db 64
-    cad	times 64 db 0
+    len db 32
+    cad	times 32 db 0
