@@ -233,6 +233,9 @@ _start:
     ret
 
 
+
+
+
     capturar:
         push edx
         push cx
