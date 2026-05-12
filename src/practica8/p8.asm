@@ -55,7 +55,7 @@ section	.text
         push edi
 
         mov ecx, [ebp + 12]
-        sub ecx, 2
+        sub ecx, 2                  ;i hasta tamaño - 2
 
         mov esi, [ebp + 8]          ;i = 0
         
@@ -115,21 +115,22 @@ section	.text
         mov esi, [ebp + 8]
         mov ecx, [ebp + 12]
         .for:
-        mov eax, dword[esi]
-        lea edi, [ebp - 32] 
+            mov eax, dword[esi]
+            lea edi, [ebp - 32] 
 
-        push eax
-        push edi
-        call _itoa
+            push eax
+            push edi
+            call _itoa
+            add esp, 8
 
-        lea edx, [ebp - 32]
-        call puts
+            lea edx, [ebp - 32]
+            call puts
 
-        xor eax, eax
-        mov al, 0x9
-        call putchar
+            xor eax, eax
+            mov al, 0x9
+            call putchar
 
-        add esi, 4
+            add esi, 4
         loop .for
 
         mov esp, ebp
@@ -138,7 +139,7 @@ section	.text
     _capturarArreglo:       ;parametros direccion de cadena de enteros, tamaño de la cadena
         push ebp
         mov ebp, esp
-        sub esp, 32      ;ebp-4 = numero entero     
+        sub esp, 32      ;ebp-32 = numero entero     
 
         push esi
         push ecx
