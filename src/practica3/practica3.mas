@@ -1,0 +1,148 @@
+SWITCH,		Input
+			Store SELECTOR
+
+CASE1, 		Subt UNO		/ CASE 1 - CAPTURAR SH_A Y SH_B
+			SkipCond 400	/ si AC != 0
+			Jump CASE2		/ saltar a CASE 2
+
+			/ SI NO
+			JnS CAPTURAR
+			Jump SWITCH
+
+CASE2, 		Load SELECTOR	/ CASE 2 - RECORRIMIENTO DE BITS DE SH_A SH_B VECES A LA IZQUIERDA
+			Subt DOS
+			SkipCond 400	/ si AC != 0
+			Jump CASE3		/ saltar a CASE 3
+
+			/ SI NO
+			JnS SHIFT_IZQ
+			Load SHL_R
+			Output
+			Jump SWITCH
+
+CASE3,		Load SELECTOR	/ CASE 3 - RECORRIMIENTO DE BITS DE SH_A SH_B VECES A LA DERECHA
+			Subt TRES
+			SkipCond 400	/ si AC != 0
+			Jump CASE4		/ saltar a case 4
+
+			/SI NO
+			JnS SHIFT_DER
+			Load SHR_R
+			Output
+			Jump SWITCH
+
+CASE4, 		Load SELECTOR 	/ CASE 4 - TERMINAR PROGRAMA
+			Subt CUATRO 	
+			SkipCond 400 	
+			Jump FIN_SWITCH 
+
+FIN_SWITCH, Halt
+
+
+CAPTURAR, HEX 000
+			Input
+		  	Store SH_A
+		  	Input 
+		  	Store SH_B
+			JumpI CAPTURAR
+
+SHIFT_IZQ, HEX 000
+			Load CERO
+			STORE I			/ I = 0
+			Load SH_A
+			STORE M 		/ M = SH_A
+
+FOR, 		Load SH_B
+			Subt I
+			SkipCond 800	/ si I > SH_B
+			Jump FIN 		/ terminar ciclo FOR
+			
+			/ si no
+			Load M
+			Add M
+			Store M
+			Store SHL_R
+
+			/ I++
+			Load I
+			Add UNO
+			Store I
+
+			Jump FOR
+
+FIN, JumpI SHIFT_IZQ
+
+
+SHIFT_DER, HEX 000
+			Load CERO
+			Store I			/ I=0
+			Load SH_A
+			Store COCI		/ COCI = SH_A
+
+FOR1,		Load SH_B
+			Subt I
+			SkipCond 800	/ si I > SH_B
+			Jump FIN1		/ terminar ciclo FOR externo
+
+			/ SI NO
+			Load COCI
+			Store DIVI		/ DIVI = COCI
+			Load CERO
+			Store COCI		/ COCI = 0, definimos COCI en 0 antes de entrar a FOR2 
+
+			/ I ++
+			Load I
+			Add UNO
+			Store I
+			
+FOR2, 		Load DIVI
+			Subt DOS
+			SkipCond 000	/ si DIVI < 0
+			Jump CUENTA_UNO	
+				
+			Jump FIN2		/ terminar ciclo FOR interno
+
+			/ SI NO
+CUENTA_UNO,	Store DIVI		/ se le resta dos a DIVISOR
+			
+			Load COCI
+			Add UNO
+			Store COCI		/ incrementa en uno el COCIENTE
+			Store SHR_R		/ SHR_R = COCI
+
+			Jump FOR2		/ siguiente iteracion del FOR INTERNO
+
+FIN2, 		Jump FOR1		/ siguiente iteracion del FOR EXTERNO
+
+FIN1, 		JumpI SHIFT_DER	/ terminar subrutina SHIFT_DER
+			
+			
+			
+	
+
+/variables para capturar
+SH_A, DEC 0
+SH_B, DEC 0
+
+/variables para SHIFT_IZQ
+M, DEC 0
+I, DEC 0
+
+/variables para SHIFT_DER
+COCI, DEC 0
+DIVI, DEC 0
+J, DEC 0
+
+/variables globales
+SHL_R, DEC 0
+SHR_R, DEC 0
+
+/variables para SWITCH
+SELECTOR, DEC 0
+
+/varaibles constantes
+CERO, DEC 0
+UNO, DEC 1
+DOS, DEC 2
+TRES, DEC 3
+CUATRO, DEC 4

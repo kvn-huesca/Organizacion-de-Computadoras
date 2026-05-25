@@ -1,0 +1,165 @@
+SWITCH,			Input
+				Store SELECTOR
+
+CASE1, 			Subt UNO			/ CASE 1 - CONVERTIR A MAYUSCULAS
+				SkipCond 400		/ si ac != 0
+				Jump CASE2			/ saltar a CASE 2
+
+				/ SI NO
+				JnS convertirMayusculas
+				Jump SWITCH
+
+CASE2, 			Load SELECTOR		/ CASE 2 - CONVERTIR A MINUSCULAS 
+				Subt DOS
+				SkipCond 400		/ si ac != 0
+				Jump CASE3			/saltar a CASE 3
+
+				/ SI NO
+				JnS convertirMinusculas
+				Jump SWITCH
+
+CASE3, 			Load SELECTOR		/ CASE 3 - MOSTRAR CADENA
+				Subt TRES
+				SkipCond 400		/ si ac != 0
+				Jump CASE4			/ saltar a CASE 4
+
+				/ SI NO
+				JnS mostrarCadena
+				Jump SWITCH
+
+CASE4, 			Load SELECTOR		/CASE 4 - TERMINAR PROGRAMA
+				Subt CUATRO
+				SkipCond 400		/ si ac != 0
+				Jump FIN_SWITCH
+				
+FIN_SWITCH, 	Halt
+
+
+mostrarCadena, HEX 00
+		       Load INICIO_CADENA //Carga la direccion en memoria de CADENA
+			   Store PTR //guardar direccion en memoria de CADENA  
+		   FOR,LoadI PTR // Lee el valor en PTR, lo interpreta como una direccion en memoria, viaja a la DIR y cargar el valor que hay en la DIR a AC
+			   SkipCond 400 // PTR =! 0
+			   Jump continuar
+			   Jump fin
+
+continuar,Output
+		  Load PTR // Carga el valor en PTR = Direccion en memoria de CADENA
+		  Add UNO // direccion en memoria de CADENA + 1
+		  Store PTR // actualiza dereccion en memoria de CADENA
+		  Jump FOR
+
+fin, JumpI mostrarCadena
+
+convertirMayusculas, HEX 00
+					 Load INICIO_CADENA
+					 Store PTR
+			   FOR1, LoadI PTR
+			   		 SkipCond 0C00 /  si PTR == 0
+					 Jump fin1 / acabar programa
+					 Jump revisarMay
+					 
+		 revisarMay, Subt CHECK
+					 SkipCond 800/ si PTR < 0
+					 Jump continuar1 / NO CONVERTIR A MAYUSCULAS
+					 / si no CONVERTIR A MAYUSCULAS
+					 LoadI PTR
+					 Subt MoM
+					 StoreI PTR
+					 Jump continuar1
+
+continuar1, Load PTR
+			Add UNO
+			Store PTR
+			Jump FOR1
+
+fin1, JumpI convertirMayusculas
+
+convertirMinusculas, HEX 00
+					 Load INICIO_CADENA
+					 Store PTR
+			   FOR2, LoadI PTR
+			   		 SkipCond 0C00 /  si PTR == 0
+					 Jump fin2 / acabar programa
+					 Jump revisarEsp
+        
+		 revisarEsp, LoadI PTR
+		 			 Subt MoM
+					 SkipCond 0C00 / si PTR == 0
+					 Jump continuar2 / NO MODIFICAR PTR	
+					 Jump revisarMin
+	 
+		 revisarMin, LoadI PTR
+		 			 Subt CHECK 
+					 SkipCond 0C00 
+					 Jump convertir
+					 SkipCond 000 / si PTR > 0
+					 Jump continuar2 / NO CONVERTIR A MINUSCULAS
+					 LoadI PTR
+					 Subt LETRA_A
+					 SkipCond 000
+					 Jump convertir
+					 Jump continuar2
+					 
+					 /si no
+		  convertir, LoadI PTR
+					 Add MoM
+					 StoreI PTR
+					 Jump continuar2
+
+continuar2, Load PTR
+			Add UNO
+			Store PTR
+			Jump FOR2
+
+fin2, JumpI convertirMinusculas
+
+
+
+
+
+PTR, HEX 00	
+INICIO_CADENA, ADR CADENA //Obtiene la direccion de memoria de CADENA
+/CADENA = "OrGaniZaciOn de Computadoras"	
+CADENA, DEC 79	
+DEC 114  	
+DEC 71	 	
+DEC 97			
+DEC 110	
+DEC 105	
+DEC 90	
+DEC 97	
+DEC 99	
+DEC 105	
+DEC 79	
+DEC 110	
+DEC 32	
+DEC 100	
+DEC 101	
+DEC 32	
+DEC 67	
+DEC 111	
+DEC 109	
+DEC 112
+DEC 117	
+DEC 116	
+DEC 97	
+DEC 100	
+DEC 111	
+DEC 114	
+DEC 97	
+DEC 115
+DEC 10	
+DEC 00	// Fin de Cadena
+
+
+
+UNO, DEC 1
+DOS, DEC 2
+TRES, DEC 3
+CUATRO, DEC 4
+SELECTOR, DEC 0
+
+MoM, DEC 32
+CHECK, DEC 90
+LETRA_A, DEC 65

@@ -1,0 +1,353 @@
+					load LIM 
+                    add M16
+                    Store LIM
+
+                    Load N1
+                    Store INC 
+                    JnS PINTAR_HORIZONTAL
+
+                    Load D_BASE_INIT
+                    Store D_BASE
+
+                    Load M16
+                    Store INC 
+                    JnS PINTAR_VERTICAL
+
+                    Load N2
+                    Store LIM
+                    Load D_BASE_INIT
+                    Store D_BASE
+
+                    Load N1
+                    Store INC
+                    JnS PINTAR_TABLERO
+
+                    JnS PINTAR_ESPIRAL
+                    Halt
+
+
+/ subrutina de la espiral
+PINTAR_ESPIRAL,     HEX 000
+                    Load D_BASE_INIT
+                    Store D_PTR
+                    Load M16
+                    Store CUR_LIM
+                    
+                    LOAD NARANJA
+                    Store COLOR
+
+                   
+                    Load CUR_LIM
+                    Store LIM
+                    Load M16
+                    Store INC
+                    JnS PINTAR
+
+                    
+                    Load CUR_LIM
+                    Subt N1
+                    Store CUR_LIM
+
+ciclo_espiral,      Load CUR_LIM
+                    SkipCond 800       / si el limite es mayor a 0 seguimos
+                    Jump fin_espiral
+
+                    / derecha
+                    Load D_PTR
+                    Add N1            
+                    Store D_PTR 
+                    Load N1
+                    Store INC
+                    Load CUR_LIM
+                    Store LIM
+                    JnS PINTAR
+
+                    / arriba
+                    Load D_PTR
+                    Add N16            / resto 16 para subir
+                    Store D_PTR 
+                    Load N16
+                    Store INC
+                    Load CUR_LIM
+                    Store LIM
+                    JnS PINTAR
+
+                    
+                    Load CUR_LIM
+                    Subt N1
+                    Store CUR_LIM
+                    SkipCond 800
+                    Jump fin_espiral
+
+                    / izquierda
+                    Load D_PTR
+                    Add MENOS1         
+                    Store D_PTR 
+                    Load MENOS1
+                    Store INC
+                    Load CUR_LIM
+                    Store LIM
+                    JnS PINTAR
+
+                    / abajo
+                    Load D_PTR
+                    Add M16            
+                    Store D_PTR 
+                    Load M16
+                    Store INC
+                    Load CUR_LIM
+                    Store LIM
+                    JnS PINTAR
+
+                    / achicamos de nuevo
+                    Load CUR_LIM
+                    Subt N1
+                    Store CUR_LIM
+                    
+                    Jump ciclo_espiral
+
+fin_espiral,        JumpI PINTAR_ESPIRAL
+
+
+/ subrutina del tablero
+PINTAR_TABLERO,     HEX 000
+                    Load CERO
+                    Store CONTADOR
+                    Store DESFASE      / iniciamos sin desfase
+                    Load M16
+                    Store M16_CONT     / para saber cuando pasan 2 filas (16 bloques)
+                    
+                    Load N1
+                    Store CONTADOR
+
+for3,               Load CONTADOR
+                    Add DESFASE        / sumo el desfase antes de restar para invertir el color
+restar_denuevo3,    Subt N2
+
+                    Store TEMP
+                    SkipCond 800
+                    Jump check3
+                    Jump restar_denuevo3
+
+check3,             Load CONTADOR
+                    Subt M129          / paro en 129 para pintar 128 bloques
+                    SkipCond 400
+                    Jump pintar3
+                    Jump fin3
+                    
+pintar3,            Load CONTADOR
+                    Add N1
+                    Store CONTADOR
+
+                    / checar si ya toca cambiar patron
+                    Load M16_CONT
+                    Subt N1
+                    Store M16_CONT
+                    SkipCond 400       
+                    Jump color3
+                    
+                    / ya pasaron 2 filas, reinicio contador y aumento desfase
+                    Load M16
+                    Store M16_CONT
+                    Load DESFASE
+                    Add N1
+                    Store DESFASE
+
+color3,             Load TEMP
+                    SkipCond 400
+                    Jump pintar_b
+                    Jump pintar_n
+
+pintar_b,           JnS pintar_blanco    
+                    Load D_BASE 
+                    Add N2             / avanzo la base de 2 en 2
+                    Store D_BASE 
+                    Jump for3
+
+pintar_n,           JnS pintar_negro
+                    Load D_BASE 
+                    Add N2             / avanzo la base de 2 en 2     
+                    Store D_BASE 
+                    Jump for3
+
+fin3,               JumpI PINTAR_TABLERO
+
+
+/ colores y lineas
+pintar_negro,       HEX 000        
+                    Load D_BASE 
+                    Store D_PTR 
+                    LOAD NEGRO
+                    Store COLOR
+                    JnS PINTAR
+                    JumpI pintar_negro
+
+pintar_blanco,      HEX 000        
+                    Load D_BASE 
+                    Store D_PTR 
+                    LOAD BLANCO
+                    Store COLOR
+                    JnS PINTAR
+                    JumpI pintar_blanco
+                    
+PINTAR_HORIZONTAL,  HEX 000
+                    Load CERO
+                    Store CONTADOR
+                    Load N1
+                    Store CONTADOR
+
+for,                Load CONTADOR
+restar_denuevo,     Subt N2
+                    Store TEMP
+                    SkipCond 800
+                    Jump check
+                    Jump restar_denuevo
+
+check,              Load CONTADOR
+                    Subt M17
+                    SkipCond 400
+                    Jump pintar
+                    Jump fin
+                    
+pintar,             Load CONTADOR
+                    Add N1
+                    Store CONTADOR
+                    Load TEMP
+                    SkipCond 400
+                    Jump pintar_r
+                    Jump pintar_a
+
+pintar_r,           JnS pintar_rojo
+                    Load D_BASE 
+                    Add M16
+                    Store D_BASE 
+                    Jump for
+
+pintar_a,           JnS pintar_azul
+                    Load D_BASE 
+                    Add M16
+                    Store D_BASE 
+                    Jump for
+
+fin,                JumpI PINTAR_HORIZONTAL
+
+PINTAR_VERTICAL,    HEX 000
+                    Load CERO
+                    Store CONTADOR
+                    Load N1
+                    Store CONTADOR
+
+for2,               Load CONTADOR
+restar_denuevo2,    Subt N2
+                    Store TEMP
+                    SkipCond 800
+                    Jump check2
+                    Jump restar_denuevo2
+
+check2,             Load CONTADOR
+                    Subt M17
+                    SkipCond 400
+                    Jump pintar2
+                    Jump fin2
+                    
+pintar2,            Load CONTADOR
+                    Add N1
+                    Store CONTADOR
+                    Load TEMP
+                    SkipCond 400
+                    Jump pintar_r2
+                    Jump pintar_a2
+                    
+pintar_r2,          JnS pintar_rojo
+                    Load D_BASE 
+                    Add N1
+                    Store D_BASE 
+                    Jump for2
+
+pintar_a2,          JnS pintar_azul
+                    Load D_BASE 
+                    Add N1
+                    Store D_BASE 
+                    Jump for2
+
+fin2,               JumpI PINTAR_VERTICAL
+
+pintar_rojo,        HEX 000        
+                    Load D_BASE 
+                    Store D_PTR 
+                    LOAD ROJO
+                    Store COLOR
+                    JnS PINTAR
+                    JumpI pintar_rojo
+
+pintar_azul,        HEX 000        
+                    Load D_BASE 
+                    Store D_PTR 
+                    LOAD AZUL
+                    Store COLOR
+                    JnS PINTAR
+                    JumpI pintar_azul
+
+
+/ subrutina de pintado principal
+COLOR,    HEX 0000
+I_P,      DEC 0
+INC,      DEC 0
+LIM,      DEC 0
+
+PINTAR,   HEX 0
+          LoadImmi 0
+          Store I_P
+P_FOR,    LOAD I_P
+          Subt LIM
+          SkipConD 0C00        
+          Jump P_RETURN
+          
+          LOAD COLOR
+          StoreI D_PTR         
+          
+          Load D_PTR
+          Add INC
+          Store D_PTR          
+          
+          LOAD I_P
+          Add N1
+          Store I_P
+          Jump P_FOR
+
+P_RETURN, Load D_PTR
+          Subt INC
+          Store D_PTR          
+          JumpI PINTAR
+
+
+/ variables y colores
+D_BASE,      DEC 3840
+D_BASE_INIT, DEC 3840
+D_FIN,       HEX 0FFF
+D_PTR,       HEX 0F00
+
+ROJO,        HEX 7C00
+VERDE,       HEX 03E0
+AZUL,        HEX 001F
+NEGRO,       HEX 0000
+BLANCO,      HEX FFFF
+NARANJA,     HEX FC00
+
+MENOS1,      DEC -1
+CERO,        DEC 0
+N1,          DEC 1
+N2,          DEC 2
+N4,          DEC 4
+N15,         DEC 15
+M16,         DEC 16
+N16,         DEC -16
+M17,         DEC 17
+M65,         DEC 65
+M129,        DEC 129
+
+CONTADOR,    DEC 0
+TEMP,        DEC 0
+M16_CONT,    DEC 16
+DESFASE,     DEC 0
+CUR_LIM,     DEC 0

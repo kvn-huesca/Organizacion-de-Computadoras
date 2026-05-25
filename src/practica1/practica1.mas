@@ -1,0 +1,163 @@
+/ Switch - Case para subrutinas de CAPTURA, MULTIPLICACION y POTENCIA.
+SWITCH, Input 
+		Store SELECTOR
+
+CASE_1, Subt UNO / CASE - CAPTURAR VALORES
+		SkipCond 400
+		Jump CASE_2 / FALSE
+
+		/TRUE
+		JnS CAPTURAR / SUBRUTINA Captura de valores
+		Jump SWITCH / Regresar a SWITCH
+
+CASE_2, Load SELECTOR / CASE - MULTIPLICACION
+		Subt DOS
+		SkipCond 400
+		Jump CASE_3 / FALSE
+
+		/ TRUE
+		jns MULTIPLICAR / SUBRUTINA MULTIPLICAR
+		/ Resultado de la multiplicacion
+		Load M
+		Output
+		Jump FIN_SWITCH / BREAK
+
+CASE_3, Load SELECTOR / CASE - POTENCIA
+		Subt TRES
+		SkipCond 400
+		Jump CASE_4 / FALSE
+
+		/ TRUE
+		JnS POTENCIA
+		/ Resultado de la potencia
+		Load RES_P
+		Output
+		Jump FIN_SWITCH
+
+CASE_4, Load SELECTOR / CASE - TERMINAR PROGRAMA
+		Subt CUATRO
+		SkipCond 400
+		Jump FIN_SWITCH
+		
+FIN_SWITCH, Halt / BREAK
+
+
+		
+/ hacer copias de a y b antes de entrar a multiplicacion para mandarlas a la funcion potencia y mantener parametros
+CAPTURAR, HEX 000
+		  Input
+		  Store A
+		  Store A_res / copia de A para subrutina Potencia
+		  Input 
+		  Store B
+		  Store B_resp / copia de B para subrutina Potencia
+JumpI CAPTURAR
+
+MULTIPLICAR, HEX 000
+	/Inicializacion de variables para la subrutina de MULTIPLICACION
+	Load CERO
+	STORE M / M = 0
+	STORE I / I = 0
+	Load A
+	Subt B 
+	/ IF (A<B), verifica si a es menor que b, en caso de, intercambiar valores para optimizar la multiplicacion
+	SkipCond 000
+		Jump FOR1 / FALSE
+
+		/ TRUE
+		Load A
+		Store TEMP
+
+		load B
+		store A
+
+		load TEMP
+		Store B
+			
+FOR1, Load B
+	 Subt I
+	 SkipCond 800 / I < B
+	 Jump RETURN1 / FALSE
+	 
+	 /TRUE
+	 /M = M + A
+	 Load M
+	 Add A
+	 Store M
+	 /I++
+	 Load I
+	 Add UNO
+	 Store I
+	 Jump FOR1
+	 
+RETURN1, JumpI MULTIPLICAR
+
+POTENCIA, HEX 000
+	/Inicializacion de variables para la subrutina POTENCIA
+	Load UNO
+	Store RES_P
+
+	Load B_resp
+	Store EXPO
+	
+	Load A_res
+	Store BASE
+
+	Load CERO
+	Store ACUM
+
+	/En caso que la potencia sea 0 regresar como respuesta 1
+	Load EXPO
+	SkipCond 0C00
+	Jump RETURN2
+	
+FOR2, Load EXPO
+	  Subt ACUM
+	  SkipCond 0C00
+	  Jump RETURN2 / FALSO
+	  
+	  / TRUE
+	  Load RES_P
+	  Store A
+
+	  Load BASE
+	  Store B
+	  
+	  JnS MULTIPLICAR
+	  
+	  Load M
+	  Store RES_P
+
+	  /I++
+	  Load ACUM
+	  Add UNO
+	  Store ACUM
+	  Jump FOR2
+
+RETURN2, JumpI POTENCIA
+	
+/ variables para SWITCH-CASE
+SELECTOR, DEC 0
+CERO, DEC 0
+UNO, DEC 1
+DOS, DEC 2
+TRES, DEC 3
+CUATRO, DEC 4
+
+/variables para la subrutina MULTIPLICAR
+A, DEC 0
+B, DEC 0
+M, DEC 0
+I, DEC 0
+
+/variables para la subrutina POTENCIA
+TEMP, DEC 0 
+RES_P, DEC 0
+BASE, DEC 0
+EXPO, DEC 0
+ACUM, DEC 0
+A_res, DEC 0
+B_resp, DEC 0
+
+
+
